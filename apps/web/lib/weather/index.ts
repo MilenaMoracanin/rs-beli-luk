@@ -35,7 +35,22 @@ export function getWeatherDescription(code: number): string {
   return WEATHER_CODES[code] ?? "Nepoznato";
 }
 
-export async function fetchJakovoWeatherForecast(): Promise<WeatherForecast> {
+export function getWeatherEmoji(code: number): string {
+  if (code === 0 || code === 1) return "☀️";
+  if (code === 2) return "⛅";
+  if (code === 3) return "☁️";
+  if (code === 45 || code === 48) return "🌫️";
+  if (code === 51) return "🌦️";
+  if (code === 61 || code === 63) return "🌧️";
+  if (code === 65 || code === 80) return "🌧️";
+  return "🌤️";
+}
+
+export const FORECAST_DAYS = 15;
+
+export async function fetchJakovoWeatherForecast(
+  forecastDays = FORECAST_DAYS,
+): Promise<WeatherForecast> {
   const url = new URL("https://api.open-meteo.com/v1/forecast");
   url.searchParams.set("latitude", JAKOVO.latitude.toString());
   url.searchParams.set("longitude", JAKOVO.longitude.toString());
@@ -44,7 +59,7 @@ export async function fetchJakovoWeatherForecast(): Promise<WeatherForecast> {
     "temperature_2m_max,temperature_2m_min,precipitation_sum,weathercode",
   );
   url.searchParams.set("timezone", "Europe/Belgrade");
-  url.searchParams.set("forecast_days", "7");
+  url.searchParams.set("forecast_days", String(forecastDays));
 
   const response = await fetch(url.toString(), {
     next: { revalidate: 3600 },
@@ -67,14 +82,23 @@ export async function fetchJakovoWeatherForecast(): Promise<WeatherForecast> {
 
   const dryDays = days.filter((d) => d.precipitation < 1).length;
   const rainyDays = days.filter((d) => d.precipitation >= 5).length;
+  const nearTerm = days.slice(0, 7);
+  const nearRainy = nearTerm.filter((d) => d.precipitation >= 5).length;
+  const nearDry = nearTerm.filter((d) => d.precipitation < 1).length;
 
   let irrigationRecommendation: string;
-  if (rainyDays >= 3) {
+  if (nearRainy >= 3) {
     irrigationRecommendation =
-      "Kišni period — navodnjavanje verovatno nije potrebno.";
-  } else if (dryDays >= 5) {
+      "Kišni period u narednih 7 dana — navodnjavanje verovatno nije potrebno.";
+  } else if (nearDry >= 5) {
     irrigationRecommendation =
-      "Sušan period — preporučeno navodnjavanje sutra ujutru.";
+      "Sušan period u narednih 7 dana — preporučeno navodnjavanje sutra ujutru.";
+  } else if (rainyDays >= 8) {
+    irrigationRecommendation =
+      `Kišnije u narednih ${days.length} dana (${rainyDays} kišna) — prati vlagu, zalivaj po potrebi.`;
+  } else if (dryDays >= 10) {
+    irrigationRecommendation =
+      `Sušnije u narednih ${days.length} dana (${dryDays} suva) — planiraj redovno navodnjavanje.`;
   } else {
     irrigationRecommendation =
       "Umereni uslovi — proverite vlagu zemljišta pre zalivanja.";

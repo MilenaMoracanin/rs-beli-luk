@@ -1,4 +1,4 @@
-import { SEASON_NAME } from "@/lib/site";
+import { SEASON_DONE_LABEL } from "@/lib/site";
 
 type ChecklistProgressProps = {
   completed: number;
@@ -12,7 +12,7 @@ export function ChecklistProgress({ completed, total, dueCount }: ChecklistProgr
   return (
     <div className="rounded-xl border border-violet-200 bg-white p-5 shadow-sm">
       <div className="flex items-center justify-between">
-        <h3 className="font-semibold text-violet-900">Checklist {SEASON_NAME}</h3>
+        <h3 className="font-semibold text-violet-900">{SEASON_DONE_LABEL}</h3>
         <span className="text-2xl font-bold text-violet-700">{percent}%</span>
       </div>
       <div className="mt-4 h-4 overflow-hidden rounded-full bg-violet-100">

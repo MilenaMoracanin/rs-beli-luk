@@ -234,6 +234,7 @@ export function seedDatabase(db: Db) {
   const existingFields = db.select().from(schema.fields).all();
   if (existingFields.length > 0) {
     consolidateToSingleSector(db);
+    syncFieldToSeedPlan(db);
     ensureChecklistForPlanting(db);
     return;
   }

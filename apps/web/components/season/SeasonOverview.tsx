@@ -1,14 +1,16 @@
-import { FieldStatus } from "@/components/field-map/FieldStatus";
-import { PlantingProgress } from "@/components/planting-progress/PlantingProgress";
+import { getDueChecklistItems } from "@beli-luk/shared";
+import { ChecklistProgress } from "@/components/dashboard/ChecklistProgress";
 import type { SeasonViewModel } from "@/lib/season/load-season-data";
 
 export function SeasonOverview({ season }: { season: SeasonViewModel }) {
-  const sector = season.data.sectors[0];
+  const checklistDone = season.checklistItems.filter((i) => i.completed).length;
+  const dueCount = getDueChecklistItems(season.checklistItems).length;
 
   return (
-    <div className="space-y-4">
-      <PlantingProgress {...season.progress} />
-      <FieldStatus sector={sector} fieldName={season.data.field.name} plan={season.plan} />
-    </div>
+    <ChecklistProgress
+      completed={checklistDone}
+      total={season.checklistItems.length}
+      dueCount={dueCount}
+    />
   );
 }

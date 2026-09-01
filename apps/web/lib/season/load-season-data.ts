@@ -13,7 +13,7 @@ import {
   type YieldEstimate,
 } from "@/lib/garlic/yield";
 import { buildMergedChecklist, buildPlanContext } from "@/lib/checklist/build";
-import { BOSUT, phaseTotals, planInputFromVariety } from "@beli-luk/shared";
+import { BOSUT, NJIVA_LENGTH_M, NJIVA_WIDTH_M, phaseTotals, planInputFromVariety } from "@beli-luk/shared";
 import type { ChecklistItemState } from "@beli-luk/shared";
 import type { ChecklistItemTemplate } from "@beli-luk/shared";
 import type { DashboardData } from "./types";
@@ -49,8 +49,8 @@ export const loadSeasonData = cache((): SeasonViewModel | null => {
   }
 
   const fieldInput = {
-    lengthM: data.field.lengthM,
-    widthM: data.field.widthM,
+    lengthM: NJIVA_LENGTH_M,
+    widthM: NJIVA_WIDTH_M,
   };
 
   const basePlan = calculateSeedPlantingPlan(

@@ -2,8 +2,8 @@ import { getDb } from "@/lib/db";
 import { getPlantingLogs } from "@/lib/actions";
 import { loadSeasonData } from "@/lib/season/load-season-data";
 import { ChecklistEditor } from "@/components/checklist/ChecklistEditor";
+import { ChecklistHashScroll } from "@/components/checklist/ChecklistHashScroll";
 import { AreaTable } from "@/components/checklist/AreaTable";
-import { FieldLayoutPlan } from "@/components/season/FieldLayoutPlan";
 import { StatCard } from "@/components/StatCard";
 import { SEASON_NAME } from "@/lib/site";
 import { BOSUT_REFERENCE } from "@beli-luk/shared";
@@ -22,25 +22,14 @@ export default async function SezonaPage() {
 
   return (
     <div className="space-y-8">
-      <FieldLayoutPlan
-        plan={plan}
-        seedKg={season.data.inventory.totalKg}
-        selectedInRow={season.checklistInRow}
-        selectedRow={season.checklistRowGap}
-      />
+      <ChecklistHashScroll />
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <StatCard
-          label="Njiva"
+          label="Ukupna njiva"
           value={`${plan.fieldLengthM}×${plan.fieldWidthM} m`}
-          subtext={`${plan.fieldAreaAr} ari · ${plan.areaUtilizationPercent}% iskorišćeno`}
+          subtext={`${plan.fieldAreaAr} ari · sadnja ${plan.rowCount} redova duž ${plan.rowLengthM} m`}
           accent="green"
-        />
-        <StatCard
-          label="Redovi"
-          value={`${plan.rowCount} × ${plan.rowLengthM} m`}
-          subtext={`${plan.widthUsedM} m širine · rezerva ${plan.widthMarginM} m`}
-          accent="blue"
         />
         <StatCard
           label="Očekivani prinos"
@@ -73,7 +62,7 @@ export default async function SezonaPage() {
       </p>
 
       <section>
-        <h2 className="mb-3 text-lg font-semibold">Uporedi razmake na njivi</h2>
+        <h2 className="mb-3 text-lg font-semibold">Uporedi razmake</h2>
         <AreaTable
           seedKg={season.data.inventory.totalKg}
           selectedInRow={season.checklistInRow}

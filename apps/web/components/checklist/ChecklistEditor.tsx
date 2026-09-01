@@ -82,7 +82,8 @@ function ItemCard({
 
   return (
     <article
-      className={`rounded-xl border p-4 transition-colors ${
+      id={item.itemKey}
+      className={`scroll-mt-24 rounded-xl border p-4 transition-colors target:border-emerald-400 target:ring-2 target:ring-emerald-300 ${
         completed ? "border-emerald-300 bg-emerald-50/50" : "border-gray-200 bg-white"
       }`}
     >

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { SEASON_NAME } from "@/lib/site";
+import { SEASON_NAME, sezonaItemHref } from "@/lib/site";
 import {
   CHECKLIST_PHASES,
   daysFromToday,
@@ -43,7 +43,7 @@ function ChecklistRow({
 
   return (
     <Link
-      href="/sezona"
+      href={sezonaItemHref(item.itemKey)}
       className={`flex items-start justify-between gap-3 rounded-lg border px-4 py-3 text-sm transition-colors ${styles}`}
     >
       <div className="min-w-0">
@@ -73,7 +73,7 @@ export function SeasonChecklistPanel({
     <div className="space-y-6">
       {nextItem && (
         <Link
-          href="/sezona"
+          href={sezonaItemHref(nextItem.itemKey)}
           className="block rounded-xl border border-emerald-300 bg-gradient-to-br from-emerald-50 to-white p-5 shadow-sm transition hover:border-emerald-400"
         >
           <p className="text-xs font-semibold uppercase tracking-wide text-emerald-700">
