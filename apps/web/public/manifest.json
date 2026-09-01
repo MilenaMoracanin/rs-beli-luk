@@ -1,7 +1,7 @@
 {
-  "name": "Beli Luk — Ekosistem",
-  "short_name": "Beli Luk",
-  "description": "Planer sadnje, održavanja i berbe belog luka na 10 ari",
+  "name": "RS Beli Luk — Ekosistem",
+  "short_name": "RS Beli Luk",
+  "description": "Planer sadnje, održavanja i berbe belog luka — sorta Bosut",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#f0fdf4",

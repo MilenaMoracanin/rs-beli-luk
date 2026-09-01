@@ -4,28 +4,27 @@ export type YieldEstimate = {
   minKg: number;
   maxKg: number;
   avgKg: number;
-  minKgPerAr: number;
-  maxKgPerAr: number;
-  avgKgPerAr: number;
+  /** kg prinosa po kg sadnog materijala */
+  minKgPerSeedKg: number;
+  maxKgPerSeedKg: number;
+  avgKgPerSeedKg: number;
 };
 
-export function estimateYield(
-  areaM2: number,
+export function estimateYieldFromSeed(
+  seedKg: number,
   variety: GarlicVariety,
 ): YieldEstimate {
-  const areaHa = areaM2 / 10000;
-  const minKg = Math.round(variety.yieldMinKgPerHa * areaHa);
-  const maxKg = Math.round(variety.yieldMaxKgPerHa * areaHa);
+  const minKg = Math.round(seedKg * variety.harvestMultiplierMin);
+  const maxKg = Math.round(seedKg * variety.harvestMultiplierMax);
   const avgKg = Math.round((minKg + maxKg) / 2);
-  const areaAr = areaM2 / 100;
 
   return {
     minKg,
     maxKg,
     avgKg,
-    minKgPerAr: Math.round(minKg / areaAr),
-    maxKgPerAr: Math.round(maxKg / areaAr),
-    avgKgPerAr: Math.round(avgKg / areaAr),
+    minKgPerSeedKg: variety.harvestMultiplierMin,
+    maxKgPerSeedKg: variety.harvestMultiplierMax,
+    avgKgPerSeedKg: Math.round(((minKg + maxKg) / 2 / seedKg) * 10) / 10,
   };
 }
 

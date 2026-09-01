@@ -1,98 +1,122 @@
-export type PlantingPlanInput = {
+import { layoutForField } from "@beli-luk/shared";
+
+export type SeedPlantingPlanInput = {
   seedKg: number;
   avgCloveWeightG: number;
+  avgClovesPerBulb?: number;
+  bulbWeightGMin?: number;
+  bulbWeightGMax?: number;
   rowSpacingCm: number;
   inRowSpacingCm: number;
-  fieldAreaM2: number;
-  fieldWidthM: number;
-  fieldLengthM: number;
-  sectorCount: number;
+  /** Dužina njive u smeru redova (m) — red ide celom dužinom */
+  fieldLengthM?: number;
+  /** Širina njive popreko redova (m) */
+  fieldWidthM?: number;
 };
 
-export type SectorPlan = {
-  name: string;
-  orderIndex: number;
-  areaM2: number;
-  rowCount: number;
-  rowLengthM: number;
-  estimatedCloves: number;
-  estimatedSeedKg: number;
-};
-
-export type PlantingPlan = {
+export type SeedPlantingPlan = {
+  seedKg: number;
   totalCloves: number;
-  totalRows: number;
-  totalRowLengthM: number;
+  estimatedBulbs: number;
+  avgCloveWeightG: number;
+  avgClovesPerBulb: number;
+  bulbWeightGMin: number;
+  bulbWeightGMax: number;
   plantsPerM2: number;
-  areaUsedM2: number;
+  requiredAreaM2: number;
+  requiredAreaAr: number;
+  rowCount: number;
+  clovesPerRow: number;
+  rowLengthM: number;
+  totalRowLengthM: number;
+  fieldLengthM: number;
+  fieldWidthM: number;
+  fieldAreaM2: number;
+  fieldAreaAr: number;
+  widthUsedM: number;
+  widthMarginM: number;
+  maxRowsInField: number;
   areaUtilizationPercent: number;
-  sectors: SectorPlan[];
   warnings: string[];
 };
 
-export function calculatePlantingPlan(input: PlantingPlanInput): PlantingPlan {
+export function calculateSeedPlantingPlan(
+  input: SeedPlantingPlanInput,
+): SeedPlantingPlan {
   const {
     seedKg,
     avgCloveWeightG,
+    avgClovesPerBulb = 9.5,
+    bulbWeightGMin = 35,
+    bulbWeightGMax = 60,
     rowSpacingCm,
     inRowSpacingCm,
-    fieldAreaM2,
-    fieldWidthM,
-    fieldLengthM,
-    sectorCount,
+    fieldLengthM = 90,
+    fieldWidthM = 23,
   } = input;
 
-  const totalCloves = Math.round((seedKg * 1000) / avgCloveWeightG);
+  const layout = layoutForField(
+    seedKg,
+    inRowSpacingCm,
+    rowSpacingCm,
+    fieldLengthM,
+    fieldWidthM,
+    avgCloveWeightG,
+  );
+
   const rowSpacingM = rowSpacingCm / 100;
   const inRowSpacingM = inRowSpacingCm / 100;
-
-  const rowsAcrossWidth = Math.floor(fieldWidthM / rowSpacingM);
-  const clovesPerRow = Math.floor(fieldLengthM / inRowSpacingM);
-  const maxClovesOnField = rowsAcrossWidth * clovesPerRow;
-  const maxRows = rowsAcrossWidth;
-
-  const totalRows = Math.min(
-    maxRows,
-    Math.ceil(totalCloves / Math.max(clovesPerRow, 1)),
-  );
-  const totalRowLengthM = totalRows * fieldLengthM;
-  const areaUsedM2 = totalRows * rowSpacingM * fieldLengthM;
-  const plantsPerM2 = totalCloves / fieldAreaM2;
+  const plantsPerM2 = 1 / (rowSpacingM * inRowSpacingM);
+  const requiredAreaM2 = Math.round(layout.totalCloves / plantsPerM2);
+  const requiredAreaAr = Math.round((requiredAreaM2 / 100) * 10) / 10;
+  const fieldAreaM2 = Math.round(fieldLengthM * fieldWidthM);
+  const fieldAreaAr = Math.round((fieldAreaM2 / 100) * 10) / 10;
+  const usedAreaM2 = Math.round(layout.widthUsedM * fieldLengthM);
+  const areaUtilizationPercent =
+    fieldAreaM2 > 0 ? Math.round((usedAreaM2 / fieldAreaM2) * 100) : 0;
+  const estimatedBulbs = Math.round(layout.totalCloves / avgClovesPerBulb);
+  const totalRowLengthM = Math.round(layout.rowCount * layout.rowLengthM);
 
   const warnings: string[] = [];
-  if (totalCloves > maxClovesOnField) {
+  if (avgCloveWeightG < 4) {
     warnings.push(
-      `Upozorenje: ${totalCloves.toLocaleString("sr-RS")} čenova ne staje na njivu. Maksimum: ${maxClovesOnField.toLocaleString("sr-RS")}.`,
+      "Masa čena ispod 4 g — proverite da li su čenovi dovoljno krupni za sadnju.",
     );
   }
-  if (areaUsedM2 > fieldAreaM2 * 1.05) {
-    warnings.push("Planirana gustoća premašuje površinu od 10 ari.");
+
+  if (!layout.fitsInField) {
+    warnings.push(
+      `Za ${seedKg} kg sada potrebno je ${layout.rowCount} redova (širina ${layout.widthUsedM} m), a na njivi ${fieldLengthM}×${fieldWidthM} m pri razmaku ${rowSpacingCm} cm staje najviše ${layout.maxRowsInField} redova. Smanjite razmak između redova ili u redu.`,
+    );
+  } else if (layout.widthMarginM >= 5) {
+    warnings.push(
+      `100 kg staje u ${layout.rowCount} redova dužine ${fieldLengthM} m (zauzeto ${layout.widthUsedM} m od ${fieldWidthM} m širine) — ostaje rezerva za pristupne puteve ili kasnije proširenje.`,
+    );
   }
 
-  const sectorAreaM2 = fieldAreaM2 / sectorCount;
-  const rowsPerSector = Math.ceil(totalRows / sectorCount);
-  const clovesPerSector = Math.round(totalCloves / sectorCount);
-  const seedKgPerSector = seedKg / sectorCount;
-
-  const sectors: SectorPlan[] = Array.from({ length: sectorCount }, (_, i) => ({
-    name: sectorCount === 1 ? "Njiva" : `Parcela ${i + 1}`,
-    orderIndex: i + 1,
-    areaM2: Math.round(sectorCount === 1 ? fieldAreaM2 : sectorAreaM2),
-    rowCount: sectorCount === 1 ? totalRows : rowsPerSector,
-    rowLengthM: fieldLengthM,
-    estimatedCloves: sectorCount === 1 ? totalCloves : clovesPerSector,
-    estimatedSeedKg:
-      sectorCount === 1 ? seedKg : Math.round(seedKgPerSector * 10) / 10,
-  }));
-
   return {
-    totalCloves,
-    totalRows,
-    totalRowLengthM: Math.round(totalRowLengthM),
+    seedKg,
+    totalCloves: layout.totalCloves,
+    estimatedBulbs,
+    avgCloveWeightG,
+    avgClovesPerBulb,
+    bulbWeightGMin,
+    bulbWeightGMax,
     plantsPerM2: Math.round(plantsPerM2 * 10) / 10,
-    areaUsedM2: Math.round(areaUsedM2),
-    areaUtilizationPercent: Math.round((areaUsedM2 / fieldAreaM2) * 100),
-    sectors,
+    requiredAreaM2,
+    requiredAreaAr,
+    rowCount: layout.rowCount,
+    clovesPerRow: layout.clovesPerRow,
+    rowLengthM: layout.rowLengthM,
+    totalRowLengthM,
+    fieldLengthM,
+    fieldWidthM,
+    fieldAreaM2,
+    fieldAreaAr,
+    widthUsedM: layout.widthUsedM,
+    widthMarginM: layout.widthMarginM,
+    maxRowsInField: layout.maxRowsInField,
+    areaUtilizationPercent,
     warnings,
   };
 }
@@ -107,5 +131,34 @@ export function getPlantingProgress(totalKg: number, usedKg: number) {
     usedKg,
     remainingKg: Math.round(remainingKg * 10) / 10,
     percentComplete,
+  };
+}
+
+/** @deprecated Koristiti calculateSeedPlantingPlan */
+export function calculatePlantingPlan(input: SeedPlantingPlanInput) {
+  const plan = calculateSeedPlantingPlan(input);
+  return {
+    totalCloves: plan.totalCloves,
+    totalRows: plan.rowCount,
+    totalRowLengthM: plan.totalRowLengthM,
+    plantsPerM2: plan.plantsPerM2,
+    areaUsedM2: plan.requiredAreaM2,
+    areaUtilizationPercent: plan.areaUtilizationPercent,
+    requiredAreaM2: plan.requiredAreaM2,
+    requiredAreaAr: plan.requiredAreaAr,
+    fieldWidthM: plan.fieldWidthM,
+    fieldLengthM: plan.fieldLengthM,
+    warnings: plan.warnings,
+    sectors: [
+      {
+        name: "Njiva",
+        orderIndex: 1,
+        areaM2: plan.fieldAreaM2,
+        rowCount: plan.rowCount,
+        rowLengthM: plan.rowLengthM,
+        estimatedCloves: plan.totalCloves,
+        estimatedSeedKg: plan.seedKg,
+      },
+    ],
   };
 }

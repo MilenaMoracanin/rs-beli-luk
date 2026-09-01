@@ -110,9 +110,24 @@ export const harvests = sqliteTable("harvests", {
   harvestedAt: text("harvested_at").notNull(),
 });
 
+export const checklistItems = sqliteTable("checklist_items", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  plantingId: integer("planting_id")
+    .notNull()
+    .references(() => plantings.id),
+  itemKey: text("item_key").notNull(),
+  completed: integer("completed", { mode: "boolean" }).notNull().default(false),
+  completedAt: text("completed_at"),
+  fieldValues: text("field_values").notNull().default("{}"),
+  estimatedCostRsd: real("estimated_cost_rsd"),
+  actualCostRsd: real("actual_cost_rsd"),
+  updatedAt: text("updated_at").notNull(),
+});
+
 export type Field = typeof fields.$inferSelect;
 export type Sector = typeof sectors.$inferSelect;
 export type SeedInventory = typeof seedInventory.$inferSelect;
 export type Planting = typeof plantings.$inferSelect;
 export type Task = typeof tasks.$inferSelect;
 export type Harvest = typeof harvests.$inferSelect;
+export type ChecklistItem = typeof checklistItems.$inferSelect;

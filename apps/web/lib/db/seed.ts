@@ -1,14 +1,135 @@
 import { eq, asc } from "drizzle-orm";
 import { addDays, formatISO } from "date-fns";
-import { GARLIC_VARIETIES } from "@beli-luk/shared";
+import {
+  BOSUT,
+  CHECKLIST_TEMPLATES,
+  DEFAULT_SEED_KG,
+  GARLIC_VARIETIES,
+  NJIVA_LENGTH_M,
+  NJIVA_WIDTH_M,
+  buildPlanContext,
+  fieldAreaM2,
+  planInputFromVariety,
+} from "@beli-luk/shared";
 import type { BetterSQLite3Database } from "drizzle-orm/better-sqlite3";
 import * as schema from "./schema";
 import { generateSeasonTasks } from "../garlic/season";
+import { calculateSeedPlantingPlan } from "../garlic/calculator";
+import { defaultFieldValues } from "../checklist/build";
 
 type Db = BetterSQLite3Database<typeof schema>;
 
-function rowCountForWidth(widthM: number, rowSpacingCm: number) {
-  return Math.floor(widthM / (rowSpacingCm / 100));
+function planFromSeed(seedKg: number) {
+  return calculateSeedPlantingPlan(
+    planInputFromVariety(seedKg, BOSUT, {
+      lengthM: NJIVA_LENGTH_M,
+      widthM: NJIVA_WIDTH_M,
+    }),
+  );
+}
+
+function ensureChecklistItems(db: Db, plantingId: number, seedKg: number, plantingStartDate: string) {
+  const plan = planFromSeed(seedKg);
+  const ctx = buildPlanContext({
+    seedKg: plan.seedKg,
+    areaM2: plan.requiredAreaM2,
+    rowSpacingCm: BOSUT.rowSpacingCm,
+    inRowSpacingCm: BOSUT.spacingCm,
+    totalRowLengthM: plan.totalRowLengthM,
+  });
+
+  const now = formatISO(new Date(), { representation: "date" });
+  const existingRows = db
+    .select()
+    .from(schema.checklistItems)
+    .where(eq(schema.checklistItems.plantingId, plantingId))
+    .all();
+  const existingKeys = new Set(existingRows.map((r) => r.itemKey));
+
+  for (const template of CHECKLIST_TEMPLATES) {
+    if (existingKeys.has(template.key)) continue;
+
+    db.insert(schema.checklistItems)
+      .values({
+        plantingId,
+        itemKey: template.key,
+        completed: false,
+        fieldValues: JSON.stringify(defaultFieldValues(template, ctx, plantingStartDate)),
+        estimatedCostRsd: null,
+        actualCostRsd: null,
+        updatedAt: now,
+      })
+      .run();
+  }
+}
+
+function ensureChecklistForPlanting(db: Db) {
+  const planting = db.select().from(schema.plantings).limit(1).get();
+  const inventory = db.select().from(schema.seedInventory).limit(1).get();
+  if (!planting || !inventory) return;
+  ensureChecklistItems(db, planting.id, inventory.totalKg, planting.plantingStartDate);
+}
+
+function syncFieldToSeedPlan(db: Db) {
+  const field = db.select().from(schema.fields).limit(1).get();
+  const inventory = field
+    ? db
+        .select()
+        .from(schema.seedInventory)
+        .where(eq(schema.seedInventory.fieldId, field.id))
+        .limit(1)
+        .get()
+    : null;
+
+  if (!field || !inventory) return;
+
+  const plan = planFromSeed(inventory.totalKg);
+  const areaM2 = fieldAreaM2(NJIVA_LENGTH_M, NJIVA_WIDTH_M);
+
+  db.update(schema.fields)
+    .set({
+      name: `Njiva — Bosut (${inventory.totalKg} kg)`,
+      widthM: NJIVA_WIDTH_M,
+      lengthM: NJIVA_LENGTH_M,
+      areaM2,
+    })
+    .where(eq(schema.fields.id, field.id))
+    .run();
+
+  const sector = db
+    .select()
+    .from(schema.sectors)
+    .where(eq(schema.sectors.fieldId, field.id))
+    .limit(1)
+    .get();
+
+  if (sector) {
+    db.update(schema.sectors)
+      .set({
+        name: "Njiva",
+        widthM: NJIVA_WIDTH_M,
+        lengthM: NJIVA_LENGTH_M,
+        areaM2,
+        rowCount: plan.rowCount,
+        rowLengthM: plan.rowLengthM,
+      })
+      .where(eq(schema.sectors.id, sector.id))
+      .run();
+  }
+
+  const planting = db
+    .select()
+    .from(schema.plantings)
+    .where(eq(schema.plantings.fieldId, field.id))
+    .limit(1)
+    .get();
+
+  if (planting && planting.varietyId !== BOSUT.id) {
+    db.update(schema.plantings)
+      .set({ varietyId: BOSUT.id })
+      .where(eq(schema.plantings.id, planting.id))
+      .run();
+  }
 }
 
 function consolidateToSingleSector(db: Db) {
@@ -22,24 +143,8 @@ function consolidateToSingleSector(db: Db) {
     .orderBy(asc(schema.sectors.orderIndex))
     .all();
 
-  const variety = GARLIC_VARIETIES[0];
-  const fullRowCount = rowCountForWidth(field.widthM, variety.rowSpacingCm);
-
   if (sectors.length <= 1) {
-    if (sectors.length === 1) {
-      db.update(schema.sectors)
-        .set({
-          name: "Njiva",
-          orderIndex: 1,
-          widthM: field.widthM,
-          lengthM: field.lengthM,
-          areaM2: field.areaM2,
-          rowCount: fullRowCount,
-          rowLengthM: field.lengthM,
-        })
-        .where(eq(schema.sectors.id, sectors[0].id))
-        .run();
-    }
+    syncFieldToSeedPlan(db);
     return;
   }
 
@@ -72,31 +177,64 @@ function consolidateToSingleSector(db: Db) {
   }
 
   db.update(schema.sectors)
-    .set({
-      name: "Njiva",
-      orderIndex: 1,
-      widthM: field.widthM,
-      lengthM: field.lengthM,
-      areaM2: field.areaM2,
-      rowCount: fullRowCount,
-      rowLengthM: field.lengthM,
-      status: mergedStatus,
-    })
+    .set({ status: mergedStatus })
     .where(eq(schema.sectors.id, primary.id))
     .run();
+
+  syncFieldToSeedPlan(db);
+}
+
+function ensureBosutOnly(db: Db) {
+  for (const variety of GARLIC_VARIETIES) {
+    const existing = db
+      .select()
+      .from(schema.varieties)
+      .where(eq(schema.varieties.id, variety.id))
+      .get();
+    if (!existing) {
+      db.insert(schema.varieties).values({
+      id: variety.id,
+      name: variety.name,
+      daysToHarvest: variety.daysToHarvest,
+      spacingCm: variety.spacingCm,
+      rowSpacingCm: variety.rowSpacingCm,
+      plantingDepthCm: variety.plantingDepthCm,
+      yieldMinKgPerHa: variety.harvestMultiplierMin,
+      yieldMaxKgPerHa: variety.harvestMultiplierMax,
+      description: variety.description,
+    }).run();
+    } else {
+      db.update(schema.varieties).set({
+        name: variety.name,
+        daysToHarvest: variety.daysToHarvest,
+        spacingCm: variety.spacingCm,
+        rowSpacingCm: variety.rowSpacingCm,
+        plantingDepthCm: variety.plantingDepthCm,
+        yieldMinKgPerHa: variety.harvestMultiplierMin,
+        yieldMaxKgPerHa: variety.harvestMultiplierMax,
+        description: variety.description,
+      }).where(eq(schema.varieties.id, variety.id)).run();
+    }
+  }
+
+  const stale = db
+    .select()
+    .from(schema.varieties)
+    .all()
+    .filter((v) => v.id !== BOSUT.id);
+
+  for (const v of stale) {
+    db.delete(schema.varieties).where(eq(schema.varieties.id, v.id)).run();
+  }
 }
 
 export function seedDatabase(db: Db) {
-  const existingVarieties = db.select().from(schema.varieties).all();
-  if (existingVarieties.length === 0) {
-    for (const variety of GARLIC_VARIETIES) {
-      db.insert(schema.varieties).values(variety).run();
-    }
-  }
+  ensureBosutOnly(db);
 
   const existingFields = db.select().from(schema.fields).all();
   if (existingFields.length > 0) {
     consolidateToSingleSector(db);
+    ensureChecklistForPlanting(db);
     return;
   }
 
@@ -104,15 +242,17 @@ export function seedDatabase(db: Db) {
   const plantingDate = formatISO(addDays(new Date(), 14), {
     representation: "date",
   });
-  const variety = GARLIC_VARIETIES[0];
+
+  const plan = planFromSeed(DEFAULT_SEED_KG);
+  const areaM2 = fieldAreaM2(NJIVA_LENGTH_M, NJIVA_WIDTH_M);
 
   const fieldResult = db
     .insert(schema.fields)
     .values({
-      name: "Njiva — 10 ari",
-      widthM: 20,
-      lengthM: 50,
-      areaM2: 1000,
+      name: `Njiva — Bosut (${DEFAULT_SEED_KG} kg)`,
+      widthM: NJIVA_WIDTH_M,
+      lengthM: NJIVA_LENGTH_M,
+      areaM2,
       createdAt: now,
     })
     .returning()
@@ -124,30 +264,28 @@ export function seedDatabase(db: Db) {
       fieldId: fieldResult.id,
       name: "Njiva",
       orderIndex: 1,
-      widthM: fieldResult.widthM,
-      lengthM: fieldResult.lengthM,
-      areaM2: fieldResult.areaM2,
-      rowCount: rowCountForWidth(fieldResult.widthM, variety.rowSpacingCm),
-      rowLengthM: fieldResult.lengthM,
+      widthM: NJIVA_WIDTH_M,
+      lengthM: NJIVA_LENGTH_M,
+      areaM2,
+      rowCount: plan.rowCount,
+      rowLengthM: plan.rowLengthM,
       status: "empty",
     })
     .returning()
     .get();
 
-  const seedResult = db
-    .insert(schema.seedInventory)
+  db.insert(schema.seedInventory)
     .values({
       fieldId: fieldResult.id,
-      varietyId: variety.id,
-      totalKg: 100,
+      varietyId: BOSUT.id,
+      totalKg: DEFAULT_SEED_KG,
       usedKg: 0,
       createdAt: now,
     })
-    .returning()
-    .get();
+    .run();
 
   const expectedHarvestDate = formatISO(
-    addDays(new Date(plantingDate), variety.daysToHarvest),
+    addDays(new Date(plantingDate), BOSUT.daysToHarvest),
     { representation: "date" },
   );
 
@@ -155,7 +293,7 @@ export function seedDatabase(db: Db) {
     .insert(schema.plantings)
     .values({
       fieldId: fieldResult.id,
-      varietyId: variety.id,
+      varietyId: BOSUT.id,
       plantingStartDate: plantingDate,
       expectedHarvestDate,
       status: "planning",
@@ -163,7 +301,7 @@ export function seedDatabase(db: Db) {
     .returning()
     .get();
 
-  const seasonTasks = generateSeasonTasks(new Date(plantingDate), variety);
+  const seasonTasks = generateSeasonTasks(new Date(plantingDate), BOSUT);
 
   for (const task of seasonTasks) {
     db.insert(schema.tasks)
@@ -179,7 +317,8 @@ export function seedDatabase(db: Db) {
       .run();
   }
 
-  void seedResult;
+  ensureChecklistItems(db, plantingResult.id, DEFAULT_SEED_KG, plantingDate);
+
   void createdSector;
 }
 
@@ -235,6 +374,19 @@ export function getDashboardData(db: Db) {
         .all()
     : [];
 
+  let checklistRows: (typeof schema.checklistItems.$inferSelect)[] = [];
+  if (planting) {
+    try {
+      checklistRows = db
+        .select()
+        .from(schema.checklistItems)
+        .where(eq(schema.checklistItems.plantingId, planting.id))
+        .all();
+    } catch {
+      checklistRows = [];
+    }
+  }
+
   return {
     field,
     sectors: fieldSectors,
@@ -243,5 +395,6 @@ export function getDashboardData(db: Db) {
     variety,
     tasks: allTasks,
     harvests,
+    checklistRows,
   };
 }

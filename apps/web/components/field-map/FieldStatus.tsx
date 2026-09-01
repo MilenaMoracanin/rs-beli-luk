@@ -1,4 +1,5 @@
 import type { Sector } from "@/lib/db/schema";
+import type { SeedPlantingPlan } from "@/lib/garlic/calculator";
 
 const statusConfig = {
   empty: { label: "Nije sadeno", color: "bg-red-100 border-red-300 text-red-800" },
@@ -11,10 +12,10 @@ const statusConfig = {
 type FieldStatusProps = {
   sector: Sector | undefined;
   fieldName: string;
-  areaM2: number;
+  plan: SeedPlantingPlan;
 };
 
-export function FieldStatus({ sector, fieldName, areaM2 }: FieldStatusProps) {
+export function FieldStatus({ sector, fieldName, plan }: FieldStatusProps) {
   const config = sector ? statusConfig[sector.status] : statusConfig.empty;
 
   return (
@@ -23,8 +24,32 @@ export function FieldStatus({ sector, fieldName, areaM2 }: FieldStatusProps) {
       <p className="mt-1 text-sm opacity-80">{config.label}</p>
       <dl className="mt-4 grid gap-2 text-sm sm:grid-cols-3">
         <div>
-          <dt className="opacity-70">Površina</dt>
-          <dd className="font-semibold">{areaM2} m² (10 ari)</dd>
+          <dt className="opacity-70">Glavica</dt>
+          <dd className="font-semibold">
+            {plan.avgClovesPerBulb} čenova ({plan.bulbWeightGMin}–{plan.bulbWeightGMax} g)
+          </dd>
+        </div>
+        <div>
+          <dt className="opacity-70">Sadni materijal</dt>
+          <dd className="font-semibold">
+            {plan.seedKg} kg · {plan.totalCloves.toLocaleString("sr-RS")} čenova
+          </dd>
+        </div>
+        <div>
+          <dt className="opacity-70">Njiva</dt>
+          <dd className="font-semibold">
+            {plan.fieldLengthM}×{plan.fieldWidthM} m ({plan.fieldAreaAr} ari)
+          </dd>
+        </div>
+        <div>
+          <dt className="opacity-70">Raspored</dt>
+          <dd className="font-semibold">
+            {plan.rowCount} redova × {plan.rowLengthM} m
+          </dd>
+        </div>
+        <div>
+          <dt className="opacity-70">Potrebna površina sada</dt>
+          <dd className="font-semibold">~{plan.requiredAreaAr} ari ({plan.requiredAreaM2} m²)</dd>
         </div>
         {sector && (
           <>

@@ -9,7 +9,8 @@
     "lint": "eslint",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
-    "db:seed": "tsx lib/db/run-seed.ts"
+    "db:seed": "tsx lib/db/run-seed.ts",
+    "scrape:bosut": "tsx scripts/scrape-bosut.ts"
   },
   "dependencies": {
     "better-sqlite3": "^12.11.1",

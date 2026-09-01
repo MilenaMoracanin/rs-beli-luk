@@ -1,4 +1,4 @@
-# Beli Luk
+# RS Beli Luk
 
 Planer za uzgajanje belog luka — Next.js PWA sa SQLite bazom.
 

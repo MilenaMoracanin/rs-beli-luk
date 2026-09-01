@@ -11,55 +11,59 @@ export const SEASON_TASK_TEMPLATES: TaskTemplate[] = [
   {
     phase: "planting",
     title: "Priprema zemljišta",
-    description: "Oranje, freziranje, provera pH (6–7), đubrenje pre sadnje.",
-    daysFromPlanting: -7,
+    description:
+      "Oranje ~20 cm, fini radni sloj 8–10 cm. NPK 8:16:24 / 6:12:24 / 7:14:21 (400–500 kg/ha) — 1/3 N + sav P i K.",
+    daysFromPlanting: -14,
+  },
+  {
+    phase: "planting",
+    title: "Priprema sadnog materijala",
+    description:
+      "100 l vode + Funomil 100 g + Signum 80 g. Potopiti čenove 45 min u džaku, sušiti na provetrenom mestu.",
+    daysFromPlanting: -1,
   },
   {
     phase: "planting",
     title: "Sadnja njive",
-    description: "Sadnja čenova na dubini 3–5 cm, razmak 10×28 cm.",
+    description:
+      "Sadnja 5.–25.10. Razmak 12–15 cm u redu × 30–50 cm između redova. Dubina 2–3 cm.",
     daysFromPlanting: 0,
   },
   {
     phase: "planting",
-    title: "Mulčiranje",
-    description: "Mulčiranje gredica za zaštitu i zadržavanje vlage.",
-    daysFromPlanting: 7,
+    title: "Herbicid pre nicanja",
+    description: "Stomp aqua 25–30 ml / 100 m² — posle sadnje, pre nicanja.",
+    daysFromPlanting: 3,
   },
   {
     phase: "maintenance",
-    title: "Provera nicanja",
-    description: "Provera prorastanja i popunjavanje praznina u redovima.",
+    title: "Prolećni herbicid",
+    description:
+      "Mart: Fusilade 1,2 l/ha (ili Select Super 1,2 l/ha). Ne tretirati posle kiše.",
     daysFromPlanting: 150,
   },
   {
     phase: "maintenance",
-    title: "Prvo plijevljenje",
-    description: "Plijevljenje cele njive (10 ari).",
-    daysFromPlanting: 160,
+    title: "Prolećna prihrana azotom",
+    description: "Preostali azot + sumpor ((NH4)2SO4 ili fertigacija) kad krene vegetacija.",
+    daysFromPlanting: 155,
   },
   {
     phase: "maintenance",
-    title: "Navodnjavanje — provera vlage",
-    description: "Zalivanje u sušnom periodu, prioritet po zonama.",
-    daysFromPlanting: 180,
+    title: "Kontrola lukove muve",
+    description: "Klopka u žutoj činiji. Tretman ako >1 muve (Šiman + Lambda/Cipkord/Polux).",
+    daysFromPlanting: 170,
   },
   {
     phase: "maintenance",
-    title: "Kontrola bolesti",
-    description: "Pregled na belu plamenjaču i druge bolesti.",
-    daysFromPlanting: 210,
+    title: "Kontrola lukove rđe",
+    description: "Elatus Era 30 ml / 10 l pri pojave. Quadris/Promesa pred berbu ako jak napad.",
+    daysFromPlanting: 200,
   },
   {
     phase: "maintenance",
-    title: "Poslednje plijevljenje",
-    description: "Finalno plijevljenje pre berbe.",
-    daysFromPlanting: 230,
-  },
-  {
-    phase: "harvest",
-    title: "Procena spremnosti za berbu",
-    description: "Provera požutelih donjih listova (~50%).",
+    title: "Tretman protiv truleži",
+    description: "3–4 nedelje pre vađenja: Switch 10 g/10 l ili Signum ~30 g/10 l.",
     daysFromPlanting: 240,
   },
   {
@@ -71,7 +75,7 @@ export const SEASON_TASK_TEMPLATES: TaskTemplate[] = [
   {
     phase: "storage",
     title: "Sušenje",
-    description: "Sušenje 2–4 nedelje na suvom, provetrenom mestu.",
+    description: "Sušenje na provetrenom mestu.",
     daysFromPlanting: 258,
   },
   {

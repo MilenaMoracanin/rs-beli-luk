@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { SITE_DESCRIPTION, SITE_NAME, SITE_TITLE } from "@/lib/site";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -13,15 +14,19 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Beli Luk — Ekosistem za uzgajanje",
-  description:
-    "Planer sadnje, održavanja i berbe belog luka na 10 ari. Praćenje 100 kg sadnog materijala.",
+  title: SITE_TITLE,
+  description: SITE_DESCRIPTION,
   manifest: "/manifest.json",
+  icons: {
+    icon: [{ url: "/icons/garlic.svg", type: "image/svg+xml" }],
+    apple: [{ url: "/icons/icon-192.svg", type: "image/svg+xml" }],
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "Beli Luk",
+    title: SITE_NAME,
   },
+  applicationName: SITE_NAME,
 };
 
 export const viewport: Viewport = {
