@@ -11,6 +11,12 @@ export type WeatherForecast = {
   irrigationRecommendation: string;
 };
 
+export const JAKOVO = {
+  name: "Jakovo",
+  latitude: 44.7528,
+  longitude: 20.6064,
+} as const;
+
 const WEATHER_CODES: Record<number, string> = {
   0: "Vedro",
   1: "Pretežno vedro",
@@ -29,13 +35,10 @@ export function getWeatherDescription(code: number): string {
   return WEATHER_CODES[code] ?? "Nepoznato";
 }
 
-export async function fetchWeatherForecast(
-  latitude: number,
-  longitude: number,
-): Promise<WeatherForecast> {
+export async function fetchJakovoWeatherForecast(): Promise<WeatherForecast> {
   const url = new URL("https://api.open-meteo.com/v1/forecast");
-  url.searchParams.set("latitude", latitude.toString());
-  url.searchParams.set("longitude", longitude.toString());
+  url.searchParams.set("latitude", JAKOVO.latitude.toString());
+  url.searchParams.set("longitude", JAKOVO.longitude.toString());
   url.searchParams.set(
     "daily",
     "temperature_2m_max,temperature_2m_min,precipitation_sum,weathercode",

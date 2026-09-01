@@ -14,7 +14,7 @@ type WeatherWidgetProps = {
 export function WeatherWidget({ days, irrigationRecommendation }: WeatherWidgetProps) {
   return (
     <div className="rounded-xl border border-sky-200 bg-sky-50 p-5 shadow-sm">
-      <h3 className="font-semibold text-sky-900">Vremenska prognoza (7 dana)</h3>
+      <h3 className="font-semibold text-sky-900">Vremenska prognoza — Jakovo (7 dana)</h3>
       <p className="mt-2 text-sm text-sky-800">{irrigationRecommendation}</p>
       <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-7">
         {days.map((day) => (

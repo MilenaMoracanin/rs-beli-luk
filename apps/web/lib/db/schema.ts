@@ -18,8 +18,6 @@ export const fields = sqliteTable("fields", {
   widthM: real("width_m").notNull(),
   lengthM: real("length_m").notNull(),
   areaM2: real("area_m2").notNull(),
-  latitude: real("latitude"),
-  longitude: real("longitude"),
   createdAt: text("created_at").notNull(),
 });
 
@@ -52,7 +50,6 @@ export const seedInventory = sqliteTable("seed_inventory", {
     .references(() => varieties.id),
   totalKg: real("total_kg").notNull(),
   usedKg: real("used_kg").notNull().default(0),
-  notes: text("notes"),
   createdAt: text("created_at").notNull(),
 });
 
@@ -83,7 +80,6 @@ export const plantingLogs = sqliteTable("planting_logs", {
     .references(() => seedInventory.id),
   kgPlanted: real("kg_planted").notNull(),
   plantedAt: text("planted_at").notNull(),
-  notes: text("notes"),
 });
 
 export const tasks = sqliteTable("tasks", {
@@ -102,15 +98,6 @@ export const tasks = sqliteTable("tasks", {
   completedAt: text("completed_at"),
 });
 
-export const journalEntries = sqliteTable("journal_entries", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
-  sectorId: integer("sector_id").references(() => sectors.id),
-  title: text("title").notNull(),
-  content: text("content").notNull(),
-  photoPath: text("photo_path"),
-  createdAt: text("created_at").notNull(),
-});
-
 export const harvests = sqliteTable("harvests", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   sectorId: integer("sector_id")
@@ -121,7 +108,6 @@ export const harvests = sqliteTable("harvests", {
     .references(() => plantings.id),
   kgHarvested: real("kg_harvested").notNull(),
   harvestedAt: text("harvested_at").notNull(),
-  notes: text("notes"),
 });
 
 export type Field = typeof fields.$inferSelect;
@@ -129,5 +115,4 @@ export type Sector = typeof sectors.$inferSelect;
 export type SeedInventory = typeof seedInventory.$inferSelect;
 export type Planting = typeof plantings.$inferSelect;
 export type Task = typeof tasks.$inferSelect;
-export type JournalEntry = typeof journalEntries.$inferSelect;
 export type Harvest = typeof harvests.$inferSelect;

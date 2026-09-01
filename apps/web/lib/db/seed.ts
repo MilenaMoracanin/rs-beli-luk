@@ -54,10 +54,6 @@ function consolidateToSingleSector(db: Db) {
       .set({ sectorId: primary.id })
       .where(eq(schema.harvests.sectorId, sector.id))
       .run();
-    db.update(schema.journalEntries)
-      .set({ sectorId: primary.id })
-      .where(eq(schema.journalEntries.sectorId, sector.id))
-      .run();
     db.delete(schema.sectors)
       .where(eq(schema.sectors.id, sector.id))
       .run();
@@ -117,8 +113,6 @@ export function seedDatabase(db: Db) {
       widthM: 20,
       lengthM: 50,
       areaM2: 1000,
-      latitude: 44.0,
-      longitude: 20.9,
       createdAt: now,
     })
     .returning()
@@ -147,7 +141,6 @@ export function seedDatabase(db: Db) {
       varietyId: variety.id,
       totalKg: 100,
       usedKg: 0,
-      notes: "100 kg sadnog belog luka za 10 ari",
       createdAt: now,
     })
     .returning()
@@ -242,8 +235,6 @@ export function getDashboardData(db: Db) {
         .all()
     : [];
 
-  const journalEntries = db.select().from(schema.journalEntries).all();
-
   return {
     field,
     sectors: fieldSectors,
@@ -252,6 +243,5 @@ export function getDashboardData(db: Db) {
     variety,
     tasks: allTasks,
     harvests,
-    journalEntries,
   };
 }

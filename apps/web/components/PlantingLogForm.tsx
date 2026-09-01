@@ -12,34 +12,19 @@ export function PlantingLogForm({ sectorId }: PlantingLogFormProps) {
     <form action={logPlanting} className="rounded-xl border border-emerald-200 bg-white p-5 shadow-sm">
       <h3 className="font-semibold text-emerald-900">Unos dnevnog rada — sadnja</h3>
       <input type="hidden" name="sectorId" value={sectorId} />
-      <div className="mt-4 grid gap-4 sm:grid-cols-2">
-        <div className="sm:col-span-2">
-          <label htmlFor="kgPlanted" className="block text-sm font-medium text-gray-700">
-            Zasađeno danas (kg)
-          </label>
-          <input
-            id="kgPlanted"
-            name="kgPlanted"
-            type="number"
-            step="0.1"
-            min="0.1"
-            required
-            placeholder="npr. 25"
-            className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
-          />
-        </div>
-        <div className="sm:col-span-2">
-          <label htmlFor="notes" className="block text-sm font-medium text-gray-700">
-            Beleška (opciono)
-          </label>
-          <input
-            id="notes"
-            name="notes"
-            type="text"
-            placeholder="npr. Završen prvi deo njive"
-            className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
-          />
-        </div>
+      <div className="mt-4">
+        <label htmlFor="kgPlanted" className="block text-sm font-medium text-gray-700">
+          Zasađeno danas (kg)
+        </label>
+        <input
+          id="kgPlanted"
+          name="kgPlanted"
+          type="number"
+          step="0.1"
+          min="0.1"
+          required
+          className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+        />
       </div>
       <FormSubmitButton
         label="Sačuvaj unos"

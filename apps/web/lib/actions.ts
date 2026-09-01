@@ -10,14 +10,12 @@ function revalidateAll() {
   revalidatePath("/njiva");
   revalidatePath("/sadnja");
   revalidatePath("/kalendar");
-  revalidatePath("/dnevnik");
   revalidatePath("/berba");
 }
 
 export async function logPlanting(formData: FormData) {
   const sectorId = Number(formData.get("sectorId"));
   const kgPlanted = Number(formData.get("kgPlanted"));
-  const notes = (formData.get("notes") as string) || null;
 
   if (!sectorId || !kgPlanted || kgPlanted <= 0) {
     throw new Error("Unesite validnu količinu.");
@@ -40,7 +38,6 @@ export async function logPlanting(formData: FormData) {
       seedInventoryId: inventory.id,
       kgPlanted,
       plantedAt: now,
-      notes,
     })
     .run();
 
@@ -102,34 +99,9 @@ export async function toggleTask(taskId: number, completed: boolean) {
   revalidateAll();
 }
 
-export async function addJournalEntry(formData: FormData) {
-  const sectorId = formData.get("sectorId")
-    ? Number(formData.get("sectorId"))
-    : null;
-  const title = formData.get("title") as string;
-  const content = formData.get("content") as string;
-
-  if (!title?.trim() || !content?.trim()) {
-    throw new Error("Naslov i sadržaj su obavezni.");
-  }
-
-  const db = getDb();
-  db.insert(schema.journalEntries)
-    .values({
-      sectorId,
-      title: title.trim(),
-      content: content.trim(),
-      createdAt: new Date().toISOString(),
-    })
-    .run();
-
-  revalidateAll();
-}
-
 export async function logHarvest(formData: FormData) {
   const sectorId = Number(formData.get("sectorId"));
   const kgHarvested = Number(formData.get("kgHarvested"));
-  const notes = (formData.get("notes") as string) || null;
 
   if (!sectorId || !kgHarvested || kgHarvested <= 0) {
     throw new Error("Unesite validan prinos.");
@@ -147,7 +119,6 @@ export async function logHarvest(formData: FormData) {
       plantingId: planting.id,
       kgHarvested,
       harvestedAt: now,
-      notes,
     })
     .run();
 
@@ -182,17 +153,10 @@ export async function getPlantingLogs() {
   return db
     .select({
       id: schema.plantingLogs.id,
-      sectorId: schema.plantingLogs.sectorId,
-      sectorName: schema.sectors.name,
       kgPlanted: schema.plantingLogs.kgPlanted,
       plantedAt: schema.plantingLogs.plantedAt,
-      notes: schema.plantingLogs.notes,
     })
     .from(schema.plantingLogs)
-    .innerJoin(
-      schema.sectors,
-      eq(schema.plantingLogs.sectorId, schema.sectors.id),
-    )
     .orderBy(desc(schema.plantingLogs.plantedAt))
     .all();
 }

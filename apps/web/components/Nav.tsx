@@ -5,7 +5,6 @@ const links = [
   { href: "/njiva", label: "Njiva" },
   { href: "/sadnja", label: "Sadnja" },
   { href: "/kalendar", label: "Kalendar" },
-  { href: "/dnevnik", label: "Dnevnik" },
   { href: "/berba", label: "Berba" },
 ];
 

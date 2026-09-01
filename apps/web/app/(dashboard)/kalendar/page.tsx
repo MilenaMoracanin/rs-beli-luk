@@ -1,7 +1,7 @@
 import { getDb } from "@/lib/db";
 import { getDashboardData } from "@/lib/db/seed";
 import { getUpcomingTasks } from "@/lib/garlic/season";
-import { fetchWeatherForecast } from "@/lib/weather";
+import { fetchJakovoWeatherForecast } from "@/lib/weather";
 import { TaskList } from "@/components/TaskList";
 import { WeatherWidget } from "@/components/WeatherWidget";
 
@@ -19,12 +19,7 @@ export default async function KalendarPage() {
 
   let weather = null;
   try {
-    if (data.field?.latitude && data.field?.longitude) {
-      weather = await fetchWeatherForecast(
-        data.field.latitude,
-        data.field.longitude,
-      );
-    }
+    weather = await fetchJakovoWeatherForecast();
   } catch {
     weather = null;
   }

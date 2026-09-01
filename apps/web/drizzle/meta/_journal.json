@@ -8,6 +8,13 @@
       "when": 1788260478807,
       "tag": "0000_known_joystick",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1788265000000,
+      "tag": "0001_cleanup_schema",
+      "breakpoints": true
     }
   ]
 }

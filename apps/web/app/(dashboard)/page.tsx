@@ -3,7 +3,7 @@ import { getDashboardData } from "@/lib/db/seed";
 import { calculatePlantingPlan, getPlantingProgress } from "@/lib/garlic/calculator";
 import { getTodaysTasks } from "@/lib/garlic/season";
 import { estimateYield, getDaysUntilHarvest } from "@/lib/garlic/yield";
-import { fetchWeatherForecast } from "@/lib/weather";
+import { fetchJakovoWeatherForecast } from "@/lib/weather";
 import { StatCard } from "@/components/StatCard";
 import { FieldStatus } from "@/components/field-map/FieldStatus";
 import { PlantingProgress } from "@/components/planting-progress/PlantingProgress";
@@ -60,12 +60,7 @@ export default async function DashboardPage() {
 
   let weather = null;
   try {
-    if (data.field.latitude && data.field.longitude) {
-      weather = await fetchWeatherForecast(
-        data.field.latitude,
-        data.field.longitude,
-      );
-    }
+    weather = await fetchJakovoWeatherForecast();
   } catch {
     weather = null;
   }

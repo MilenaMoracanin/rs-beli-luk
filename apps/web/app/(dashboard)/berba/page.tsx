@@ -42,7 +42,7 @@ export default function BerbaPage() {
         </p>
       </header>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 sm:grid-cols-3">
         <StatCard
           label="Očekivani prinos"
           value={`${yieldEstimate.avgKg} kg`}
@@ -61,24 +61,6 @@ export default function BerbaPage() {
           subtext="Prosek"
           accent="blue"
         />
-        <StatCard
-          label="Sušara"
-          value="20–40 m²"
-          subtext="Preporučeni kapacitet"
-          accent="purple"
-        />
-      </div>
-
-      <div className="rounded-xl border border-violet-200 bg-violet-50 p-5">
-        <h3 className="font-semibold text-violet-900">Checklist berbe</h3>
-        <ul className="mt-3 space-y-2 text-sm text-violet-800">
-          <li>• Donji listovi požutele ~50%</li>
-          <li>• Test kopanja — glavice dobro formirane</li>
-          <li>• Berba u suhom periodu</li>
-          <li>• Vađenje viljuškom — ne povlačiti za lišće</li>
-          <li>• Sušenje 2–4 nedelje na provetrenom mestu</li>
-          <li>• Skladištenje na 0–4°C, suv prostor</li>
-        </ul>
       </div>
 
       <HarvestForm sectorId={sector.id} />
@@ -92,7 +74,6 @@ export default function BerbaPage() {
                 <tr>
                   <th className="px-4 py-3 text-left">Datum</th>
                   <th className="px-4 py-3 text-left">Ubrano (kg)</th>
-                  <th className="px-4 py-3 text-left">Beleška</th>
                 </tr>
               </thead>
               <tbody>
@@ -107,9 +88,6 @@ export default function BerbaPage() {
                       <td className="px-4 py-3">{harvest.harvestedAt}</td>
                       <td className="px-4 py-3 font-medium">
                         {harvest.kgHarvested} kg
-                      </td>
-                      <td className="px-4 py-3 text-gray-600">
-                        {harvest.notes ?? "—"}
                       </td>
                     </tr>
                   ))}
