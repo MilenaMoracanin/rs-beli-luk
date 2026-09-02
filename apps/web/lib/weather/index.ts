@@ -61,9 +61,7 @@ export async function fetchJakovoWeatherForecast(
   url.searchParams.set("timezone", "Europe/Belgrade");
   url.searchParams.set("forecast_days", String(forecastDays));
 
-  const response = await fetch(url.toString(), {
-    next: { revalidate: 3600 },
-  });
+  const response = await fetch(url.toString());
 
   if (!response.ok) {
     throw new Error("Neuspešno učitavanje vremenske prognoze.");

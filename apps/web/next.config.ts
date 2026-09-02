@@ -1,16 +1,14 @@
 import type { NextConfig } from "next";
-import withSerwistInit from "@serwist/next";
 
-const withSerwist = withSerwistInit({
-  swSrc: "app/sw.ts",
-  swDest: "public/sw.js",
-  disable: process.env.NODE_ENV === "development",
-});
+const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
 
 const nextConfig: NextConfig = {
-  output: "standalone",
-  serverExternalPackages: ["better-sqlite3"],
+  output: "export",
+  basePath: basePath || undefined,
+  assetPrefix: basePath || undefined,
+  trailingSlash: true,
+  images: { unoptimized: true },
   turbopack: {},
 };
 
-export default withSerwist(nextConfig);
+export default nextConfig;

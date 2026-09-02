@@ -1,5 +1,3 @@
-import { redirect } from "next/navigation";
+import LegacyRedirectPage from "@/components/LegacyRedirectPage";
 
-export default function KalendarRedirectPage() {
-  redirect("/sezona");
-}
+export default LegacyRedirectPage;

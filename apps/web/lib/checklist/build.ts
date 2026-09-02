@@ -9,7 +9,7 @@ import {
   type ChecklistItemTemplate,
   type ChecklistPlanContext,
 } from "@beli-luk/shared";
-import type { ChecklistItem } from "@/lib/db/schema";
+import type { ChecklistRow } from "@/lib/season/types";
 
 export function defaultFieldValues(
   template: ChecklistItemTemplate,
@@ -38,7 +38,7 @@ export function mergeChecklistItem(
   template: ChecklistItemTemplate,
   ctx: ChecklistPlanContext,
   plantingStartDate: string,
-  row?: ChecklistItem | null,
+  row?: ChecklistRow | null,
 ): ChecklistItemState & { template: ChecklistItemTemplate } {
   const plannedDueDate = plannedDateFromPlanting(
     plantingStartDate,
@@ -79,7 +79,7 @@ export function mergeChecklistItem(
 export function buildMergedChecklist(
   ctx: ChecklistPlanContext,
   plantingStartDate: string,
-  rows: ChecklistItem[],
+  rows: ChecklistRow[],
 ): Array<ChecklistItemState & { template: ChecklistItemTemplate }> {
   const byKey = new Map(rows.map((r) => [r.itemKey, r]));
   const items = CHECKLIST_TEMPLATES.map((template) =>

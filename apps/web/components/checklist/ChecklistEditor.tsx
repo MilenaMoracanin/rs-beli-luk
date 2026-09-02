@@ -11,7 +11,7 @@ import {
   sortItemsByPlannedDate,
   type ChecklistItemTemplate,
 } from "@beli-luk/shared";
-import { updateChecklistItem } from "@/lib/actions";
+import { useSeason } from "@/lib/season/season-store";
 import { SEASON_NAME } from "@/lib/site";
 import type { ChecklistItemState } from "@beli-luk/shared";
 import { PlantingLogForm } from "@/components/PlantingLogForm";
@@ -47,6 +47,7 @@ function ItemCard({
   harvestStats?: { totalHarvested: number; percentOfExpected: number };
   yieldEstimate?: { avgKg: number; minKg: number; maxKg: number };
 }) {
+  const { updateChecklistItem } = useSeason();
   const [pending, startTransition] = useTransition();
   const [values, setValues] = useState(item.fieldValues);
   const [completed, setCompleted] = useState(item.completed);
@@ -66,8 +67,8 @@ function ItemCard({
       ? computeItemCost(item.template.costCalc, nextValues)
       : null;
 
-    startTransition(async () => {
-      await updateChecklistItem({
+    startTransition(() => {
+      updateChecklistItem({
         itemKey: item.itemKey,
         completed: nextCompleted,
         fieldValues: nextValues,

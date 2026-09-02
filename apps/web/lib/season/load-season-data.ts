@@ -1,6 +1,3 @@
-import { cache } from "react";
-import { getDb } from "@/lib/db";
-import { getDashboardData } from "@/lib/db/seed";
 import {
   calculateSeedPlantingPlan,
   getPlantingProgress,
@@ -16,7 +13,7 @@ import { buildMergedChecklist, buildPlanContext } from "@/lib/checklist/build";
 import { BOSUT, NJIVA_LENGTH_M, NJIVA_WIDTH_M, phaseTotals, planInputFromVariety } from "@beli-luk/shared";
 import type { ChecklistItemState } from "@beli-luk/shared";
 import type { ChecklistItemTemplate } from "@beli-luk/shared";
-import type { DashboardData } from "./types";
+import type { DashboardData, SeasonState } from "./types";
 
 export type SeasonViewModel = {
   data: {
@@ -38,15 +35,20 @@ export type SeasonViewModel = {
   checklistTotals: Record<string, number>;
   checklistInRow: number;
   checklistRowGap: number;
+  plantingLogs: SeasonState["plantingLogs"];
 };
 
-export const loadSeasonData = cache((): SeasonViewModel | null => {
-  getDb();
-  const data = getDashboardData(getDb());
-
-  if (!data?.field || !data.inventory || !data.planting) {
-    return null;
-  }
+export function buildSeasonViewModel(state: SeasonState): SeasonViewModel {
+  const data: DashboardData = {
+    field: state.field,
+    sectors: state.sectors,
+    inventory: state.inventory,
+    planting: state.planting,
+    variety: state.variety,
+    tasks: state.tasks,
+    harvests: state.harvests,
+    checklistRows: state.checklistRows,
+  };
 
   const fieldInput = {
     lengthM: NJIVA_LENGTH_M,
@@ -68,7 +70,7 @@ export const loadSeasonData = cache((): SeasonViewModel | null => {
   const checklistItemsDraft = buildMergedChecklist(
     baseCtx,
     data.planting.plantingStartDate,
-    data.checklistRows ?? [],
+    data.checklistRows,
   );
   const sadnjaItem = checklistItemsDraft.find((i) => i.itemKey === "sadnja");
   const checklistInRow = Number(sadnjaItem?.fieldValues.razmak_u_redu) || BOSUT.spacingCm;
@@ -91,22 +93,13 @@ export const loadSeasonData = cache((): SeasonViewModel | null => {
   const checklistItems = buildMergedChecklist(
     ctx,
     data.planting.plantingStartDate,
-    data.checklistRows ?? [],
+    data.checklistRows,
   );
   const checklistTotals = phaseTotals(checklistItems);
   const yieldEstimate = estimateYieldFromSeed(data.inventory.totalKg, BOSUT);
 
   return {
-    data: {
-      field: data.field,
-      inventory: data.inventory,
-      planting: data.planting,
-      sectors: data.sectors,
-      tasks: data.tasks,
-      harvests: data.harvests,
-      checklistRows: data.checklistRows,
-      variety: data.variety,
-    },
+    data,
     plan,
     progress: getPlantingProgress(data.inventory.totalKg, data.inventory.usedKg),
     yieldEstimate,
@@ -116,5 +109,6 @@ export const loadSeasonData = cache((): SeasonViewModel | null => {
     checklistTotals,
     checklistInRow,
     checklistRowGap,
+    plantingLogs: state.plantingLogs,
   };
-});
+}

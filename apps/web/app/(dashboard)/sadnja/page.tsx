@@ -1,5 +1,3 @@
-import { redirect } from "next/navigation";
+import LegacyRedirectPage from "@/components/LegacyRedirectPage";
 
-export default function SadnjaRedirectPage() {
-  redirect("/sezona");
-}
+export default LegacyRedirectPage;

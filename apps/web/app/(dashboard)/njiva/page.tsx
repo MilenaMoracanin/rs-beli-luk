@@ -1,5 +1,3 @@
-import { redirect } from "next/navigation";
+import LegacyRedirectPage from "@/components/LegacyRedirectPage";
 
-export default function NjivaRedirectPage() {
-  redirect("/sezona");
-}
+export default LegacyRedirectPage;

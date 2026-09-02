@@ -1,6 +1,6 @@
 # RS Beli Luk
 
-Planer za uzgajanje belog luka — Next.js PWA sa SQLite bazom.
+Planer za uzgajanje belog luka — statička Next.js aplikacija hostovana na GitHub Pages.
 
 ## Pokretanje lokalno
 
@@ -11,17 +11,19 @@ npm run dev
 
 Aplikacija: http://localhost:3000
 
-## Javni link (Render + GitHub Actions)
+## Javni link (GitHub Pages)
 
-1. Na [render.com](https://render.com) kreiraj **New → Blueprint** i poveži repo `MilenaMoracanin/beli-luk-ekosistem` (koristi `render.yaml`).
-2. Render će dati javni URL, npr. `https://beli-luk-ekosistem.onrender.com`.
-3. Svaki push na `main` pokreće GitHub Actions:
-   - **CI** — provera builda
-   - **Deploy** — Docker slika na GHCR + opcioni Render deploy hook
+Svaki push na `main` pokreće GitHub Actions i deployuje sajt na:
 
-Opciono: u GitHub repo **Settings → Secrets → Actions** dodaj `RENDER_DEPLOY_HOOK` (Render → Service → Deploy Hook) da Actions automatski osvežava sajt posle pusha.
+**https://milenaMoracanin.github.io/beli-luk-ekosistem/**
+
+Prvi put: u repo **Settings → Pages → Build and deployment → Source** izaberi **GitHub Actions**.
+
+## Podaci
+
+Nema servera ni baze — sav sadržaj dolazi iz `packages/shared`, a tvoj napredak (checklist, sadnja, berba) se čuva u **localStorage** u browseru.
 
 ## Struktura
 
 - `apps/web` — Next.js aplikacija
-- `packages/shared` — sorte i šabloni zadataka
+- `packages/shared` — sorte, šabloni zadataka, kalkulacije
