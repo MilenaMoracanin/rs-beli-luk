@@ -223,6 +223,14 @@ function ensureBosutOnly(db: Db) {
     .filter((v) => v.id !== BOSUT.id);
 
   for (const v of stale) {
+    db.update(schema.seedInventory)
+      .set({ varietyId: BOSUT.id })
+      .where(eq(schema.seedInventory.varietyId, v.id))
+      .run();
+    db.update(schema.plantings)
+      .set({ varietyId: BOSUT.id })
+      .where(eq(schema.plantings.varietyId, v.id))
+      .run();
     db.delete(schema.varieties).where(eq(schema.varieties.id, v.id)).run();
   }
 }
