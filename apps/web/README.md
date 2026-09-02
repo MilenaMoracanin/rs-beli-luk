@@ -15,7 +15,7 @@ Aplikacija: http://localhost:3000
 
 Svaki push na `main` pokreće GitHub Actions i deployuje sajt na:
 
-**https://milenaMoracanin.github.io/beli-luk-ekosistem/**
+**https://milenaMoracanin.github.io/rs-beli-luk/**
 
 Prvi put: u repo **Settings → Pages → Build and deployment → Source** izaberi **GitHub Actions**.
 

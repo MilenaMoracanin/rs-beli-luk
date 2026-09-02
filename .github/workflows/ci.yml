@@ -22,5 +22,5 @@ jobs:
 
       - name: Build static site
         env:
-          NEXT_PUBLIC_BASE_PATH: /beli-luk-ekosistem
+          NEXT_PUBLIC_BASE_PATH: /rs-beli-luk
         run: npm run build

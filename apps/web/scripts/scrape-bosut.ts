@@ -47,7 +47,7 @@ async function fetchSource(source: (typeof SOURCES)[number]) {
   try {
     const response = await fetch(source.url, {
       headers: {
-        "User-Agent": "BeliLuk-ResearchBot/1.0 (educational; +https://github.com/MilenaMoracanin/beli-luk-ekosistem)",
+        "User-Agent": "BeliLuk-ResearchBot/1.0 (educational; +https://github.com/MilenaMoracanin/rs-beli-luk)",
         Accept: "text/html,application/xhtml+xml",
       },
       signal: AbortSignal.timeout(15000),
