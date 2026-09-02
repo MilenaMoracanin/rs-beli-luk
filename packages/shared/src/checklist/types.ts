@@ -52,8 +52,6 @@ export type ChecklistItemTemplate = {
   referenceNote?: string;
   fields: ChecklistFieldDef[];
   costCalc: ChecklistCostCalc;
-  /** Ugrađena akcija u UI (evidencija rada) */
-  action?: "planting" | "harvest";
 };
 
 export type ChecklistItemState = {

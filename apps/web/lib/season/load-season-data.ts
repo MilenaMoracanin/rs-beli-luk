@@ -3,7 +3,6 @@ import { getDb } from "@/lib/db";
 import { getDashboardData } from "@/lib/db/seed";
 import {
   calculateSeedPlantingPlan,
-  getPlantingProgress,
   type SeedPlantingPlan,
 } from "@/lib/garlic/calculator";
 import {
@@ -16,21 +15,13 @@ import { buildMergedChecklist, buildPlanContext } from "@/lib/checklist/build";
 import { BOSUT, NJIVA_LENGTH_M, NJIVA_WIDTH_M, phaseTotals, planInputFromVariety } from "@beli-luk/shared";
 import type { ChecklistItemState } from "@beli-luk/shared";
 import type { ChecklistItemTemplate } from "@beli-luk/shared";
-import type { DashboardData } from "./types";
 
 export type SeasonViewModel = {
   data: {
-    field: NonNullable<DashboardData["field"]>;
-    inventory: NonNullable<DashboardData["inventory"]>;
-    planting: NonNullable<DashboardData["planting"]>;
-    sectors: DashboardData["sectors"];
-    tasks: DashboardData["tasks"];
-    harvests: DashboardData["harvests"];
-    checklistRows: DashboardData["checklistRows"];
-    variety: DashboardData["variety"];
+    inventory: NonNullable<NonNullable<ReturnType<typeof getDashboardData>>["inventory"]>;
+    planting: NonNullable<NonNullable<ReturnType<typeof getDashboardData>>["planting"]>;
   };
   plan: SeedPlantingPlan;
-  progress: ReturnType<typeof getPlantingProgress>;
   yieldEstimate: YieldEstimate;
   harvestStats: ReturnType<typeof getHarvestStats>;
   daysUntilHarvest: number;
@@ -44,7 +35,7 @@ export const loadSeasonData = cache((): SeasonViewModel | null => {
   getDb();
   const data = getDashboardData(getDb());
 
-  if (!data?.field || !data.inventory || !data.planting) {
+  if (!data?.inventory || !data.planting) {
     return null;
   }
 
@@ -98,17 +89,10 @@ export const loadSeasonData = cache((): SeasonViewModel | null => {
 
   return {
     data: {
-      field: data.field,
       inventory: data.inventory,
       planting: data.planting,
-      sectors: data.sectors,
-      tasks: data.tasks,
-      harvests: data.harvests,
-      checklistRows: data.checklistRows,
-      variety: data.variety,
     },
     plan,
-    progress: getPlantingProgress(data.inventory.totalKg, data.inventory.usedKg),
     yieldEstimate,
     harvestStats: getHarvestStats(data.harvests, yieldEstimate),
     daysUntilHarvest: getDaysUntilHarvest(data.planting.expectedHarvestDate),

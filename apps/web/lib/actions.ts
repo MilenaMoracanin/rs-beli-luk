@@ -9,12 +9,6 @@ import { SEASON_NAME } from "@/lib/site";
 function revalidateAll() {
   revalidatePath("/");
   revalidatePath("/sezona", "layout");
-  revalidatePath("/istrazivanje/bosut");
-  revalidatePath("/njiva");
-  revalidatePath("/sadnja");
-  revalidatePath("/kalendar");
-  revalidatePath("/checklist");
-  revalidatePath("/berba");
 }
 
 export async function updateChecklistItem(input: {

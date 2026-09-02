@@ -13,7 +13,6 @@ import {
 } from "@beli-luk/shared";
 import type { BetterSQLite3Database } from "drizzle-orm/better-sqlite3";
 import * as schema from "./schema";
-import { generateSeasonTasks } from "../garlic/season";
 import { calculateSeedPlantingPlan } from "../garlic/calculator";
 import { defaultFieldValues } from "../checklist/build";
 
@@ -302,22 +301,6 @@ export function seedDatabase(db: Db) {
     .returning()
     .get();
 
-  const seasonTasks = generateSeasonTasks(new Date(plantingDate), BOSUT);
-
-  for (const task of seasonTasks) {
-    db.insert(schema.tasks)
-      .values({
-        plantingId: plantingResult.id,
-        sectorId: task.sectorId,
-        phase: task.phase,
-        title: task.title,
-        description: task.description,
-        dueDate: formatISO(task.dueDate, { representation: "date" }),
-        completed: false,
-      })
-      .run();
-  }
-
   ensureChecklistItems(db, plantingResult.id, DEFAULT_SEED_KG, plantingDate);
 
   void createdSector;
@@ -351,22 +334,6 @@ export function getDashboardData(db: Db) {
     .limit(1)
     .get();
 
-  const variety = planting
-    ? db
-        .select()
-        .from(schema.varieties)
-        .where(eq(schema.varieties.id, planting.varietyId))
-        .get()
-    : null;
-
-  const allTasks = planting
-    ? db
-        .select()
-        .from(schema.tasks)
-        .where(eq(schema.tasks.plantingId, planting.id))
-        .all()
-    : [];
-
   const harvests = planting
     ? db
         .select()
@@ -393,8 +360,6 @@ export function getDashboardData(db: Db) {
     sectors: fieldSectors,
     inventory,
     planting,
-    variety,
-    tasks: allTasks,
     harvests,
     checklistRows,
   };

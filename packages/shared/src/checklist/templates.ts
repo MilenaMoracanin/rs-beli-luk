@@ -175,7 +175,6 @@ export const CHECKLIST_TEMPLATES: ChecklistItemTemplate[] = [
     description: `Razmak ${BOSUT.spacingCmMin}–${BOSUT.spacingCmMax} cm u redu × ${BOSUT.rowSpacingCmMin}–${BOSUT.rowSpacingCmMax} cm između redova. Dubina ${BOSUT.plantingDepthCmMin}–${BOSUT.plantingDepthCmMax} cm.`,
     daysFromPlanting: 0,
     timing: `${BOSUT.plantingWindowStart} – ${BOSUT.plantingWindowEnd}`,
-    action: "planting",
     referenceNote:
       "Razmak u redu zavisi od kap-po-kap sistema; međuredni — od načina sadnje/berbe i širine guma traktora.",
     fields: [
@@ -395,7 +394,6 @@ export const CHECKLIST_TEMPLATES: ChecklistItemTemplate[] = [
     description: "Berba kada je usev spreman — unos dnevnog prinosa ispod.",
     daysFromPlanting: 255,
     timing: "Kraj sezone — planirani datum berbe",
-    action: "harvest",
     fields: [
       { key: "termin", label: "Planirani termin berbe", type: "date" },
       { key: "beleska", label: "Beleška", type: "text", placeholder: "Uslovi, napomena" },

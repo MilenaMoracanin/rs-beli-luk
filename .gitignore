@@ -1,9 +1,11 @@
 node_modules/
 .next/
-data/
 *.db
 *.db-shm
 *.db-wal
+apps/web/data/*
+!apps/web/data/.gitkeep
 .DS_Store
 .env
 .env.local
+apps/web/content/research/bosut/scraped-snapshot.json

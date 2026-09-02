@@ -54,10 +54,6 @@ export const BOSUT: GarlicVariety = {
 
 export const GARLIC_VARIETIES: GarlicVariety[] = [BOSUT];
 
-export function getVarietyById(id: string): GarlicVariety | undefined {
-  return GARLIC_VARIETIES.find((v) => v.id === id);
-}
-
 export const DEFAULT_SEED_KG = 100;
 
 export function planInputFromVariety(
