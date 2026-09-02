@@ -6,7 +6,10 @@ RUN apt-get update \
 
 FROM base AS builder
 COPY . .
-RUN npm ci && npm run build
+RUN npm ci && npm install --no-save \
+  lightningcss-linux-x64-gnu@1.32.0 \
+  @tailwindcss/oxide-linux-x64-gnu@4.3.3 \
+  --workspace=web && npm run build
 
 FROM base AS runner
 ENV NODE_ENV=production
