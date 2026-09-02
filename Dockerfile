@@ -4,16 +4,9 @@ RUN apt-get update \
   && apt-get install -y --no-install-recommends python3 make g++ \
   && rm -rf /var/lib/apt/lists/*
 
-FROM base AS deps
-COPY package.json package-lock.json ./
-COPY apps/web/package.json ./apps/web/
-COPY packages/shared/package.json ./packages/shared/
-RUN npm ci
-
 FROM base AS builder
-COPY --from=deps /app/node_modules ./node_modules
 COPY . .
-RUN npm run build
+RUN npm ci && npm run build
 
 FROM base AS runner
 ENV NODE_ENV=production

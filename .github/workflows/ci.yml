@@ -18,10 +18,7 @@ jobs:
           cache: npm
 
       - name: Install dependencies
-        run: npm ci
-
-      - name: Install Linux CSS native bindings
-        run: npm install --no-save lightningcss-linux-x64-gnu@1.32.0 --workspace=web
+        run: npm install
 
       - name: Build
         run: npm run build
