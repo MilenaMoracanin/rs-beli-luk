@@ -1,5 +1,6 @@
 import { Nav } from "@/components/Nav";
-import { SeasonProvider } from "@/lib/season/season-store";
+
+export const dynamic = "force-dynamic";
 
 export default function DashboardLayout({
   children,
@@ -9,9 +10,7 @@ export default function DashboardLayout({
   return (
     <div className="min-h-screen bg-gradient-to-b from-emerald-50 to-white">
       <Nav />
-      <main className="mx-auto max-w-6xl px-4 py-6">
-        <SeasonProvider>{children}</SeasonProvider>
-      </main>
+      <main className="mx-auto max-w-6xl px-4 py-6">{children}</main>
     </div>
   );
 }

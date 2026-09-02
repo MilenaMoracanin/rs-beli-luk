@@ -20,7 +20,12 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Build static site
-        env:
-          NEXT_PUBLIC_BASE_PATH: /rs-beli-luk
+      - name: Install Linux native bindings
+        run: |
+          npm install --no-save \
+            lightningcss-linux-x64-gnu@1.32.0 \
+            @tailwindcss/oxide-linux-x64-gnu@4.3.3 \
+            --workspace=web
+
+      - name: Build
         run: npm run build

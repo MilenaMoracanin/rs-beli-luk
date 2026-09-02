@@ -8,14 +8,13 @@ import {
   getUpcomingChecklistItems,
 } from "@beli-luk/shared";
 import { fetchJakovoWeatherForecast, type WeatherForecast } from "@/lib/weather";
-import { useSeason } from "@/lib/season/season-store";
+import type { SeasonViewModel } from "@/lib/season/load-season-data";
 import { SEASON_NAME } from "@/lib/site";
 import { WeatherWidget } from "@/components/WeatherWidget";
 import { ChecklistProgress } from "@/components/dashboard/ChecklistProgress";
 import { SeasonChecklistPanel } from "@/components/dashboard/SeasonChecklistPanel";
 
-export function DashboardPageClient() {
-  const { season } = useSeason();
+export function DashboardPageClient({ season }: { season: SeasonViewModel }) {
   const [weather, setWeather] = useState<WeatherForecast | null>(null);
 
   useEffect(() => {

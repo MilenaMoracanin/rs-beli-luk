@@ -1,6 +1,6 @@
 "use client";
 
-import { useSeason } from "@/lib/season/season-store";
+import type { SeasonViewModel } from "@/lib/season/load-season-data";
 import { ChecklistEditor } from "@/components/checklist/ChecklistEditor";
 import { ChecklistHashScroll } from "@/components/checklist/ChecklistHashScroll";
 import { AreaTable } from "@/components/checklist/AreaTable";
@@ -8,9 +8,7 @@ import { StatCard } from "@/components/StatCard";
 import { SEASON_NAME } from "@/lib/site";
 import { BOSUT_REFERENCE } from "@beli-luk/shared";
 
-export function SezonaPageClient() {
-  const { season } = useSeason();
-  const sector = season.data.sectors[0];
+export function SezonaPageClient({ season }: { season: SeasonViewModel }) {
   const { plan } = season;
 
   return (
@@ -68,11 +66,6 @@ export function SezonaPageClient() {
       <ChecklistEditor
         items={season.checklistItems}
         phaseTotals={season.checklistTotals}
-        sectorId={sector?.id}
-        plantingLogs={season.plantingLogs}
-        harvests={season.data.harvests}
-        harvestStats={season.harvestStats}
-        yieldEstimate={season.yieldEstimate}
       />
     </div>
   );

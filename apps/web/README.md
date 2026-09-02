@@ -1,6 +1,6 @@
 # RS Beli Luk
 
-Planer za uzgajanje belog luka — statička Next.js aplikacija hostovana na GitHub Pages.
+Planer za uzgajanje belog luka — Next.js aplikacija sa SQLite bazom, hostovana na Railway.
 
 ## Pokretanje lokalno
 
@@ -11,19 +11,17 @@ npm run dev
 
 Aplikacija: http://localhost:3000
 
-## Javni link (GitHub Pages)
+## Deploy na Railway
 
-Svaki push na `main` pokreće GitHub Actions i deployuje sajt na:
+1. Na [railway.app](https://railway.app) kreiraj novi projekat iz GitHub repoa `rs-beli-luk`
+2. Railway automatski koristi `Dockerfile` iz repoa
+3. Dodaj **Volume** mount na `/app/apps/web/data` (SQLite baza ostaje trajna)
+4. Railway dodeljuje javni URL — taj link možeš deliti
 
-**https://milenaMoracanin.github.io/rs-beli-luk/**
-
-Prvi put: u repo **Settings → Pages → Build and deployment → Source** izaberi **GitHub Actions**.
-
-## Podaci
-
-Nema servera ni baze — sav sadržaj dolazi iz `packages/shared`, a tvoj napredak (checklist, sadnja, berba) se čuva u **localStorage** u browseru.
+Podaci (checklist, troškovi) čuvaju se u SQLite bazi na serveru — isti su na svim uređajima i browserima.
 
 ## Struktura
 
 - `apps/web` — Next.js aplikacija
 - `packages/shared` — sorte, šabloni zadataka, kalkulacije
+- `apps/web/data/` — SQLite baza (runtime, na Railway volume-u)

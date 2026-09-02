@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
 import {
   CHECKLIST_PHASES,
   computeItemCost,
@@ -11,46 +11,26 @@ import {
   sortItemsByPlannedDate,
   type ChecklistItemTemplate,
 } from "@beli-luk/shared";
-import { useSeason } from "@/lib/season/season-store";
+import { updateChecklistItem } from "@/lib/actions";
 import { SEASON_NAME } from "@/lib/site";
 import type { ChecklistItemState } from "@beli-luk/shared";
-import { PlantingLogForm } from "@/components/PlantingLogForm";
-import { HarvestForm } from "@/components/HarvestForm";
 
 type MergedItem = ChecklistItemState & { template: ChecklistItemTemplate };
-
-type PlantingLog = { id: number; kgPlanted: number; plantedAt: string };
-type HarvestRow = { id: number; kgHarvested: number; harvestedAt: string };
 
 type ChecklistEditorProps = {
   items: MergedItem[];
   phaseTotals: Record<string, number>;
-  sectorId?: number;
-  plantingLogs?: PlantingLog[];
-  harvests?: HarvestRow[];
-  harvestStats?: { totalHarvested: number; percentOfExpected: number };
-  yieldEstimate?: { avgKg: number; minKg: number; maxKg: number };
 };
 
-function ItemCard({
-  item,
-  sectorId,
-  plantingLogs,
-  harvests,
-  harvestStats,
-  yieldEstimate,
-}: {
-  item: MergedItem;
-  sectorId?: number;
-  plantingLogs?: PlantingLog[];
-  harvests?: HarvestRow[];
-  harvestStats?: { totalHarvested: number; percentOfExpected: number };
-  yieldEstimate?: { avgKg: number; minKg: number; maxKg: number };
-}) {
-  const { updateChecklistItem } = useSeason();
+function ItemCard({ item }: { item: MergedItem }) {
   const [pending, startTransition] = useTransition();
   const [values, setValues] = useState(item.fieldValues);
   const [completed, setCompleted] = useState(item.completed);
+
+  useEffect(() => {
+    setCompleted(item.completed);
+    setValues(item.fieldValues);
+  }, [item.itemKey, item.completed, item.fieldValues]);
 
   const liveTotal = useMemo(() => {
     if (!hasCostInputs(item.template.costCalc, values)) return null;
@@ -67,8 +47,8 @@ function ItemCard({
       ? computeItemCost(item.template.costCalc, nextValues)
       : null;
 
-    startTransition(() => {
-      updateChecklistItem({
+    startTransition(async () => {
+      await updateChecklistItem({
         itemKey: item.itemKey,
         completed: nextCompleted,
         fieldValues: nextValues,
@@ -189,69 +169,6 @@ function ItemCard({
           })}
         </div>
       )}
-
-      {item.template.action === "planting" && sectorId != null && (
-        <div className="mt-4 space-y-4 border-t border-emerald-100 pt-4">
-          <PlantingLogForm sectorId={sectorId} />
-          {plantingLogs && plantingLogs.length > 0 && (
-            <div className="overflow-x-auto rounded-xl border border-gray-200 bg-white">
-              <table className="w-full text-sm">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-4 py-3 text-left">Datum</th>
-                    <th className="px-4 py-3 text-left">Kg</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {plantingLogs.map((log) => (
-                    <tr key={log.id} className="border-t border-gray-100">
-                      <td className="px-4 py-3">{log.plantedAt}</td>
-                      <td className="px-4 py-3">{log.kgPlanted} kg</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
-      )}
-
-      {item.template.action === "harvest" && sectorId != null && (
-        <div className="mt-4 space-y-4 border-t border-violet-100 pt-4">
-          {yieldEstimate && harvestStats && (
-            <p className="text-sm text-gray-600">
-              Očekivano {yieldEstimate.minKg}–{yieldEstimate.maxKg} kg (prosek {yieldEstimate.avgKg}{" "}
-              kg) · ubrano {harvestStats.totalHarvested} kg ({harvestStats.percentOfExpected}%)
-            </p>
-          )}
-          <HarvestForm sectorId={sectorId} />
-          {harvests && harvests.length > 0 && (
-            <div className="overflow-x-auto rounded-xl border border-gray-200 bg-white">
-              <table className="w-full text-sm">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-4 py-3 text-left">Datum</th>
-                    <th className="px-4 py-3 text-left">Ubrano (kg)</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {[...harvests]
-                    .sort(
-                      (a, b) =>
-                        new Date(b.harvestedAt).getTime() - new Date(a.harvestedAt).getTime(),
-                    )
-                    .map((harvest) => (
-                      <tr key={harvest.id} className="border-t border-gray-100">
-                        <td className="px-4 py-3">{harvest.harvestedAt}</td>
-                        <td className="px-4 py-3 font-medium">{harvest.kgHarvested} kg</td>
-                      </tr>
-                    ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
-      )}
     </article>
   );
 }
@@ -259,11 +176,6 @@ function ItemCard({
 export function ChecklistEditor({
   items,
   phaseTotals: phaseTotalsMap,
-  sectorId,
-  plantingLogs,
-  harvests,
-  harvestStats,
-  yieldEstimate,
 }: ChecklistEditorProps) {
   const totalSeason = useMemo(() => seasonTotal(items), [items]);
   const completedCount = items.filter((i) => i.completed).length;
@@ -320,15 +232,7 @@ export function ChecklistEditor({
             </div>
             <div className="space-y-4">
               {phaseItems.map((item) => (
-                <ItemCard
-                  key={item.itemKey}
-                  item={item}
-                  sectorId={sectorId}
-                  plantingLogs={plantingLogs}
-                  harvests={harvests}
-                  harvestStats={harvestStats}
-                  yieldEstimate={yieldEstimate}
-                />
+                <ItemCard key={item.itemKey} item={item} />
               ))}
             </div>
           </section>

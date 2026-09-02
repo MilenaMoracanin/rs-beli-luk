@@ -1,12 +1,16 @@
 "use client";
 
-import { useSeason } from "@/lib/season/season-store";
+import type { SeasonViewModel } from "@/lib/season/load-season-data";
 import { SEASON_NAME } from "@/lib/site";
 import { SeasonOverview } from "@/components/season/SeasonOverview";
 
-export function SezonaLayoutClient({ children }: { children: React.ReactNode }) {
-  const { season } = useSeason();
-
+export function SezonaLayoutClient({
+  season,
+  children,
+}: {
+  season: SeasonViewModel;
+  children: React.ReactNode;
+}) {
   return (
     <div className="space-y-6">
       <header>

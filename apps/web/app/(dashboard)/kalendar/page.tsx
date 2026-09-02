@@ -1,3 +1,5 @@
-import LegacyRedirectPage from "@/components/LegacyRedirectPage";
+import { redirect } from "next/navigation";
 
-export default LegacyRedirectPage;
+export default function LegacyRedirectPage() {
+  redirect("/sezona");
+}
