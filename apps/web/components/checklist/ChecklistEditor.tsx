@@ -37,6 +37,9 @@ function ItemCard({ item }: { item: MergedItem }) {
     return computeItemCost(item.template.costCalc, values);
   }, [item.template.costCalc, values]);
 
+  const plannedDisplay =
+    values.termin || values.datum || item.plannedDueDate;
+
   function save(patch: {
     fieldValues?: Record<string, string>;
     completed?: boolean;
@@ -57,8 +60,12 @@ function ItemCard({ item }: { item: MergedItem }) {
     });
   }
 
-  function onFieldChange(key: string, value: string) {
-    setValues((prev) => ({ ...prev, [key]: value }));
+  function onFieldChange(key: string, value: string, options?: { saveNow?: boolean }) {
+    const nextValues = { ...values, [key]: value };
+    setValues(nextValues);
+    if (options?.saveNow) {
+      save({ fieldValues: nextValues });
+    }
   }
 
   return (
@@ -84,7 +91,7 @@ function ItemCard({ item }: { item: MergedItem }) {
           <div>
             <h3 className="font-semibold text-gray-900">{item.template.title}</h3>
             <p className="text-xs font-medium text-violet-700">
-              Planirano: {formatSrDate(item.plannedDueDate)}
+              Planirano: {formatSrDate(plannedDisplay)}
               {item.template.timing ? ` · ${item.template.timing}` : ""}
             </p>
           </div>
@@ -130,8 +137,9 @@ function ItemCard({ item }: { item: MergedItem }) {
                   <select
                     value={value}
                     disabled={pending}
-                    onChange={(e) => onFieldChange(field.key, e.target.value)}
-                    onBlur={() => save({})}
+                    onChange={(e) =>
+                      onFieldChange(field.key, e.target.value, { saveNow: true })
+                    }
                     className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2"
                   >
                     {field.options.map((opt) => (
@@ -146,6 +154,7 @@ function ItemCard({ item }: { item: MergedItem }) {
 
             const inputType =
               field.type === "currency" || field.type === "number" ? "number" : field.type;
+            const saveImmediately = field.type === "date";
 
             return (
               <label key={field.key} className="block text-sm">
@@ -160,8 +169,14 @@ function ItemCard({ item }: { item: MergedItem }) {
                   disabled={pending}
                   min={field.type === "currency" || field.type === "number" ? 0 : undefined}
                   step={field.type === "currency" ? 1 : undefined}
-                  onChange={(e) => onFieldChange(field.key, e.target.value)}
-                  onBlur={() => save({})}
+                  onChange={(e) =>
+                    onFieldChange(field.key, e.target.value, {
+                      saveNow: saveImmediately,
+                    })
+                  }
+                  onBlur={() => {
+                    if (!saveImmediately) save({});
+                  }}
                   className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2"
                 />
               </label>
@@ -184,8 +199,8 @@ export function ChecklistEditor({
   return (
     <div className="space-y-8">
       <div className="rounded-xl border border-blue-200 bg-blue-50 p-4 text-sm text-blue-900">
-        Unesi svoje cene u polja ispod — ukupno se računa automatski. Datumi se planiraju od dana
-        sadnje; možeš ih prilagoditi po stavci.
+        Unesi svoje cene u polja ispod — ukupno se računa automatski. Promena termina sadnje odmah
+        pomera planirane datume u svim sekcijama.
       </div>
 
       <div className="grid gap-4 sm:grid-cols-3">

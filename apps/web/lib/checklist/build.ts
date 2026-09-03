@@ -61,6 +61,13 @@ export function mergeChecklistItem(
     }
   }
 
+  // Ljubičasti "Planirano" i prazna date polja uvek prate datum sadnje
+  for (const field of template.fields) {
+    if (field.type === "date" && !fieldValues[field.key]) {
+      fieldValues[field.key] = plannedDueDate;
+    }
+  }
+
   const totalComputed = hasCostInputs(template.costCalc, fieldValues)
     ? computeItemCost(template.costCalc, fieldValues)
     : null;

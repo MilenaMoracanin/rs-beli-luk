@@ -6,7 +6,7 @@ import { ChecklistHashScroll } from "@/components/checklist/ChecklistHashScroll"
 import { AreaTable } from "@/components/checklist/AreaTable";
 import { StatCard } from "@/components/StatCard";
 import { SEASON_NAME } from "@/lib/site";
-import { BOSUT_REFERENCE } from "@beli-luk/shared";
+import { BOSUT_REFERENCE, formatSrDate } from "@beli-luk/shared";
 
 export function SezonaPageClient({ season }: { season: SeasonViewModel }) {
   const { plan } = season;
@@ -31,7 +31,7 @@ export function SezonaPageClient({ season }: { season: SeasonViewModel }) {
         <StatCard
           label="Dana do berbe"
           value={String(season.daysUntilHarvest)}
-          subtext={season.data.planting.expectedHarvestDate}
+          subtext={formatSrDate(season.data.planting.expectedHarvestDate)}
           accent="purple"
         />
       </div>
